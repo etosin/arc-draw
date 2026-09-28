@@ -45,6 +45,16 @@ export type BootstrapHandle = {
 const SHAPE_EXTRACTION_MAX_ATTEMPTS = 10;
 const SHAPE_EXTRACTION_INTERVAL_MS = 1000;
 
+/**
+ * True once draw.io's Graph.decompress is callable. Some SAP shapes (generic
+ * icons, default/coloured connectors) are captured via it in
+ * shape-extractor.ts; Graph.js can still be loading when ui.sidebar already
+ * exists, so extraction must wait for this too, not just the sidebar.
+ */
+export function isGraphDecompressReady(): boolean {
+  return typeof (window as any).Graph?.decompress === "function";
+}
+
 function generateDocumentId(): string {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
     return crypto.randomUUID();
@@ -244,6 +254,16 @@ export function bootstrapPlugin(opts: BootstrapOptions): BootstrapHandle {
     const tryExtractShapes = (): boolean => {
       try {
         if (!ui?.sidebar) return false;
+        // Some SAP shapes (generic icons, default/coloured connectors) are
+        // captured via Graph.decompress (see shape-extractor.ts). Graph.js is
+        // a large script that can still be loading when the sidebar already
+        // exists, and a first pass that runs before it is ready would look
+        // like a "success" (foundation icons etc. do not need it) and never
+        // retry — silently losing those SAP categories for the session. Wait
+        // for it too.
+        if (!isGraphDecompressReady()) {
+          return false;
+        }
         const map = extractShapesFromSidebar(ui);
         if (map.size === 0) return false;
         const runtime = new Map(
