@@ -30,6 +30,14 @@
 6. **Colour containers by owner, systems by type.** A customer / on-premise
    environment is a NON-SAP boundary → **grey** container, even though an SAP system
    inside it stays **blue** (§6a). Blue is only for SAP/BTP.
+7. **Pick the level first.** SAP defines three audiences: **L0** (only needs an
+   overview: business roles, enterprise architects, IT managers), **L1** (strong
+   technical acumen, takes part in technical decisions) and **L2** (extensive technical
+   understanding, needs detail to decide). The guideline mentions L3 only in passing and
+   does not specify it, so treat "L3" as L2 plus the implementation detail the user
+   asks for (protocols, ports, adapters, destinations). If the user does not state a
+   level, draw **L2 and say so in one sentence** (this default is ARC-DRAW's own
+   convention, not SAP's).
 
 ---
 

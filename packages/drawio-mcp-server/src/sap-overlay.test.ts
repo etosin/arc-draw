@@ -40,6 +40,12 @@ describe("ARC-DRAW SAP overlay (MCP surface)", () => {
     expect(instructions).toContain("get-sap-examples");
   });
 
+  it("tells the agent how to pick a diagram level", () => {
+    const instructions = client.getInstructions() ?? "";
+    expect(instructions).toContain("Pick the level first");
+    expect(instructions).toMatch(/L2 and say so/);
+  });
+
   it("registers the SAP tools", async () => {
     const { tools } = await client.listTools();
     const names = tools.map((t) => t.name);
