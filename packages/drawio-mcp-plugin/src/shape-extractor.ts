@@ -15,6 +15,8 @@ export type ExtractedShape = {
   name: string;
   paletteId: string;
   category: string;
+  /** Explicit catalog key, for shapes whose style cannot identify them. */
+  key?: string;
 };
 
 const ADDER_TO_PALETTE: Record<string, string> = {
@@ -29,6 +31,45 @@ const ADDER_TO_PALETTE: Record<string, string> = {
   // They complement (do not replace) the bundled sap.* catalog.
   addSAPPalette: "sap",
 };
+
+function unescapeXml(s: string): string {
+  return s
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;|&#39;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&");
+}
+
+function xmlAttr(tag: string, name: string): string | null {
+  const m = new RegExp(`(?:^|\\s)${name}="([^"]*)"`).exec(tag);
+  return m ? unescapeXml(m[1]) : null;
+}
+
+/**
+ * draw.io stores many palette entries as compressed XML "data entries".
+ * Returns the style and size when the decoded template is exactly one plain
+ * cell: one vertex (a generic icon...) or one edge (a default connector).
+ * Multi-cell groups return null, since they cannot be placed as one shape.
+ */
+export function parseSingleCellTemplate(
+  xml: string,
+): { style: string; width: number; height: number } | null {
+  const vertexTags = xml.match(/<mxCell\b[^>]*\bvertex="1"[^>]*>/g) ?? [];
+  const edgeTags = xml.match(/<mxCell\b[^>]*\bedge="1"[^>]*>/g) ?? [];
+  if (vertexTags.length + edgeTags.length !== 1) return null;
+
+  const cellTag = vertexTags[0] ?? edgeTags[0];
+  if (!cellTag) return null;
+  const style = xmlAttr(cellTag, "style");
+  if (!style) return null;
+
+  const after = xml.slice(xml.indexOf(cellTag) + cellTag.length);
+  const geometry = /<mxGeometry\b[^>]*>/.exec(after)?.[0] ?? "";
+  const width = Number(xmlAttr(geometry, "width")) || 0;
+  const height = Number(xmlAttr(geometry, "height")) || 0;
+  return { style, width, height };
+}
 
 export function extractShapesFromSidebar(
   ui: any,
@@ -77,7 +118,7 @@ export function extractShapesFromSidebar(
         _expanded: boolean,
         onInit: (container: any) => void,
       ) {
-        if (title) currentSection = title;
+        if (title && currentPalette !== "sap") currentSection = title;
         try {
           onInit({ appendChild() {} });
         } catch {}
@@ -89,7 +130,9 @@ export function extractShapesFromSidebar(
         _expanded: boolean,
         fns: Array<(container: any) => any>,
       ) {
-        if (title) currentSection = title;
+        // SAP announces its sections through setCurrentSearchEntryLibrary
+        // (below); its palette titles would only rename them too late.
+        if (title && currentPalette !== "sap") currentSection = title;
         const fake = { appendChild() {} };
         for (const fn of fns) {
           try {
@@ -109,6 +152,36 @@ export function extractShapesFromSidebar(
         }
       },
 
+      // drawio's addDataEntry() ends up here with the compressed template.
+      // Only SAP is captured this way (generic icons, default connectors).
+      // Many SAP data entries (areas, accents, text) have no title at all and
+      // are skipped: a shape without a name cannot be asked for by name.
+      createVertexTemplateFromData(
+        data: string,
+        w: number,
+        h: number,
+        title: string,
+      ) {
+        if (currentPalette !== "sap" || !title) return null;
+        const decompress = (window as any).Graph?.decompress;
+        if (typeof decompress !== "function") return null;
+        try {
+          const parsed = parseSingleCellTemplate(decompress(data));
+          if (!parsed) return null;
+          const category = `mxgraph.sap.${slug(currentSection || "default")}`;
+          recorded.push({
+            style: parsed.style,
+            width: parsed.width || w,
+            height: parsed.height || h,
+            name: String(title),
+            paletteId: currentPalette,
+            category,
+            key: `${category}.${slug(title)}`,
+          });
+        } catch {}
+        return null;
+      },
+
       createEdgeTemplateEntry: () => () => null,
       addEntry: (_tags: any, fn: any) => fn,
       createTitle: () =>
@@ -117,6 +190,22 @@ export function extractShapesFromSidebar(
           : ({} as any),
     },
   );
+
+  // addSAPPalette() calls ~20 sub-palettes in sequence. Isolate each one so a
+  // failure in one does not discard every palette that follows it.
+  for (const name of Object.getOwnPropertyNames(Sidebar.prototype)) {
+    if (!/^addSAP\w+Palette$/.test(name) || name === "addSAPPalette") continue;
+    const original = Sidebar.prototype[name];
+    if (typeof original !== "function") continue;
+    dummy[name] = function (this: unknown, ...args: unknown[]) {
+      try {
+        return original.apply(this, args);
+      } catch (err) {
+        console.warn(`[shape-extractor] ${name} threw; skipping it`, err);
+        return undefined;
+      }
+    };
+  }
 
   for (const [adder, paletteId] of Object.entries(ADDER_TO_PALETTE)) {
     if (typeof dummy[adder] !== "function") {
@@ -134,8 +223,21 @@ export function extractShapesFromSidebar(
     }
   }
 
+  // A title that repeats inside one section (for example the coloured
+  // connectors, which differ only by colour) is ambiguous: drop all of them
+  // rather than let the agent guess.
+  const explicitCount = new Map<string, number>();
+  for (const s of recorded) {
+    if (s.key) explicitCount.set(s.key, (explicitCount.get(s.key) ?? 0) + 1);
+  }
+
   const out = new Map<string, ExtractedShape>();
   for (const s of recorded) {
+    if (s.key) {
+      if ((explicitCount.get(s.key) ?? 0) > 1) continue;
+      if (!out.has(s.key)) out.set(s.key, s);
+      continue;
+    }
     const key = deriveKey(s.style);
     if (key) out.set(key, s);
   }
