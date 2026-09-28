@@ -156,7 +156,10 @@ We would rather tell you now:
 
 **MCP client shows `Failed to reconnect: -32000`.** The build didn't run on this machine. Run `pnpm install && pnpm -r build` and check that `packages/drawio-mcp-server/build/index.js` exists.
 
-**The first launch is slow.** The built-in editor downloads draw.io once and caches it. On restricted networks, see [`--asset-path` in CONFIG.md](./CONFIG.md).
+**The first launch is slow, or fails with "Could not download the draw.io editor assets".** The built-in editor downloads draw.io once and caches it. If GitHub rate-limits your network (common on shared IPs and behind corporate proxies), ARC-DRAW retries through the GitHub release page on its own. If that fails too, it prints the fix. Either:
+
+- set a `GITHUB_TOKEN` environment variable (any token, no scopes needed) and start again; or
+- install the assets by hand: download `draw.war` from the [draw.io releases](https://github.com/jgraph/drawio/releases/latest), unzip it into `<folder>/webapp` (so that `index.html` sits directly inside), delete the `WEB-INF` and `META-INF` folders in there, and start the server with `--asset-path <folder>`.
 
 More in [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) and [`docs/SAP-INTEGRATION.md`](./docs/SAP-INTEGRATION.md).
 

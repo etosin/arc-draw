@@ -10,7 +10,7 @@ Every CLI flag has a matching environment variable. CLI flags take precedence ov
 | `--extension-port`, `-p` | `DRAWIO_MCP_EXTENSION_PORT` | WebSocket port for browser extension | 3333 |
 | `--http-port` | `DRAWIO_MCP_HTTP_PORT` | HTTP transport port | 3000 |
 | `--transport` | `DRAWIO_MCP_TRANSPORT` | Transport type: `stdio`, `http`, or `stdio,http` | `stdio` |
-| `--asset-path` | `DRAWIO_MCP_ASSET_PATH` | Custom path for downloaded assets | - |
+| `--asset-path` | `DRAWIO_MCP_ASSET_PATH` | Folder that holds the draw.io editor assets (`<path>/webapp/index.html`). Downloaded there on first run; see [restricted networks](#restricted-networks-and-github-rate-limits) if the download fails | - |
 | `--host` | `DRAWIO_MCP_HOST` | Explicit IPv4 or IPv6 bind address for all server endpoints (HTTP, WebSocket) | unset (OS chooses) |
 | `--websocket-url` | `DRAWIO_MCP_WEBSOCKET_URL` | Override WebSocket URL advertised to the editor (must be `ws://` or `wss://`) | derived from page |
 | `--logger` | `DRAWIO_MCP_LOGGER` | Logger mode: `console` (writes to stderr) or `mcp-server` (sends MCP `notifications/message`). The legacy underscore form `mcp_server` is also accepted as a value alias. | `console` |
@@ -428,3 +428,12 @@ DRAWIO_MCP_LOGGER=mcp-server drawio-mcp-server --editor
 ## Install subcommand
 
 `drawio-mcp-server install <host>` writes and removes the MCP entry in each host's config file. Full reference in [docs/PLUGINS.md](./docs/PLUGINS.md).
+
+## Restricted networks and GitHub rate limits
+
+On first run, `--editor` downloads the draw.io editor (`draw.war`) from GitHub. The server asks the GitHub API for the latest release and, if the API refuses (anonymous callers share a limit of 60 requests per hour per IP, so a `403` is common on corporate or shared networks), falls back to the public release page.
+
+If the download still fails:
+
+- set `GITHUB_TOKEN` (or `GH_TOKEN`) to any GitHub token; no scopes are needed. Authenticated requests have a much higher limit; or
+- install the assets by hand: download `draw.war` from <https://github.com/jgraph/drawio/releases/latest>, unzip it into `<asset-path>/webapp`, delete `WEB-INF` and `META-INF` there, and start with `--asset-path <asset-path>`. Without `--asset-path` the folder is the per-user cache directory (for example `%LOCALAPPDATA%\drawio-mcp-server\Cache` on Windows).
