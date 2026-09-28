@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Ask a question or share an idea
+    url: https://github.com/etosin/arc-draw/discussions
+    about: Questions, half-formed ideas and "how do I…" belong in Discussions.
+  - name: Report a security vulnerability
+    url: https://github.com/etosin/arc-draw/security/advisories/new
+    about: Please do not open a public issue for security problems.

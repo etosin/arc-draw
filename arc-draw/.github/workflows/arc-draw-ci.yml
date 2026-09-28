@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [22.x]
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v5
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check the SAP constitution is up to date
+        run: node tools/build-sap-constitution.cjs --check
+
+      - name: Build
+        run: pnpm -r build
+
+      - name: Test
+        run: |
+          pnpm --filter drawio-mcp-compat test
+          pnpm --filter drawio-mcp-claude-plugin test
+          pnpm --filter drawio-mcp-plugin test
+          pnpm --filter drawio-mcp-server exec jest build/ --maxWorkers=2
+        env:
+          NODE_OPTIONS: --experimental-vm-modules
+
+      - name: Lint
+        run: pnpm --filter drawio-mcp-server lint

@@ -1,0 +1,82 @@
+[
+  {
+    "title": "Record the demo GIF for the README",
+    "labels": [
+      "help wanted",
+      "documentation"
+    ],
+    "body": "The README needs a 20-30 second demo at the top: a prompt on the left, the diagram building itself on the right. It is the single most effective thing for showing what ARC-DRAW does.\n\n**What to record**\n- The TO-BE inbound integration prompt from the README (or your own, sanitised)\n- The draw.io canvas filling in, then a small manual edit to show it is a live canvas\n\n**Acceptance criteria**\n- `docs/assets/demo.gif` (or `.mp4` plus a poster image), under 8 MB\n- Shown directly under the badges in `README.md`\n- No client names, system IDs or hostnames visible anywhere in the recording\n\nTools that work well: ScreenToGif (Windows), Kap (macOS), Peek (Linux)."
+  },
+  {
+    "title": "One-line install: publish to npm and repoint the Claude Code plugin",
+    "labels": [
+      "help wanted",
+      "enhancement"
+    ],
+    "body": "Today ARC-DRAW is installed from source. Goal: `npx <package> --editor` should work.\n\n**Known blockers**\n- The npm name `drawio-mcp-server` belongs to upstream. We need our own package name (scoped or unscoped) and to update `bin` and the workspace filters used in scripts and CI.\n- `npx drawio-mcp-server install <host>` and the Claude Code plugin (`.claude-plugin/marketplace.json`, `packages/drawio-mcp-claude-plugin/.claude-plugin/plugin.json`) currently run the *upstream* server, which has **no SAP layer**. `tests/manifest.test.ts` asserts the upstream args and must be updated too.\n- A publish workflow (with provenance) has to be added; the inherited ones were removed on purpose.\n\n**Acceptance criteria**\n- A fresh machine with only Node installed can run the documented one-liner\n- The install command and the Claude Code plugin both start ARC-DRAW, not upstream\n- README quick start and Known limitations updated\n\nPlease discuss the package name in an issue comment before starting."
+  },
+  {
+    "title": "Setup guide: Cursor, GitHub Copilot and other MCP clients",
+    "labels": [
+      "good first issue",
+      "documentation"
+    ],
+    "body": "We have only verified Claude Code. ARC-DRAW is a standard MCP server, so other clients should work, but nobody has confirmed it.\n\n**Task**\nPick a client (Cursor, GitHub Copilot in VS Code, Codex, Zed, Windsurf, ...), get ARC-DRAW working and add a short section to a new `docs/CLIENTS.md`:\n- the exact config snippet\n- anything that behaved differently (transport, permissions, tool approval prompts)\n- a screenshot of a diagram it produced\n\nEven a \"this did not work, here is the error\" report is useful. Comment on this issue with your client so nobody duplicates the work."
+  },
+  {
+    "title": "Pattern: replace a PI/PO interface with Cloud Integration (AS-IS / TO-BE)",
+    "labels": [
+      "pattern",
+      "good first issue"
+    ],
+    "body": "One of the most common SAP integration diagrams. We want it as a reusable pattern the agent can mirror.\n\n**Task**\nDescribe the pattern (components, flows, sync/async) using the pattern proposal template, and add the prompt plus a reference diagram under `docs/patterns/`.\n\n**Please cover**\n- AS-IS: sender -> PI/PO -> receiver, with the systems in their real landscape locations\n- TO-BE: the same interface through Cloud Integration (Integration Suite area) and, where relevant, Cloud Connector\n- How the AS-IS and TO-BE are laid out side by side, per the SAP guideline\n\nRemove anything confidential from reference diagrams."
+  },
+  {
+    "title": "Pattern: side-by-side extension with CAP, Destination and Cloud Connector",
+    "labels": [
+      "pattern",
+      "good first issue"
+    ],
+    "body": "A CAP application on Cloud Foundry reads S/4HANA on-premise through a Destination and Cloud Connector; users sign in through Cloud Identity Services.\n\n**Task**\nDescribe the pattern (components, flows, where each system sits) and add the prompt plus a reference diagram under `docs/patterns/`. Check the result with the agent and report where it deviates from the SAP guideline."
+  },
+  {
+    "title": "Review the constitution against the latest SAP BTP Solution Diagram guideline",
+    "labels": [
+      "sap-guideline",
+      "good first issue"
+    ],
+    "body": "The drawing rules in `constitution/sap-btp-diagram.md` were distilled from the SAP BTP Solution Diagram guideline. Guidelines change, and a distilled copy can drift or be simply wrong in places.\n\n**Task**\nGo through one section at a time against https://sap.github.io/btp-solution-diagrams and open a PR (or an issue) for each mismatch, **citing the guideline page**.\n\nEdit only the Markdown files under `constitution/`. Run `node tools/build-sap-constitution.cjs` to regenerate the TypeScript, or leave it to CI to tell you it is stale."
+  },
+  {
+    "title": "Compare the bundled sap.* icons with draw.io's native mxgraph.sap.* palette",
+    "labels": [
+      "help wanted",
+      "enhancement"
+    ],
+    "body": "ARC-DRAW currently exposes two sets of SAP icons:\n- `sap.*`: 111 icons bundled in the plugin (`packages/drawio-mcp-plugin/src/sap-catalog.json`)\n- `mxgraph.sap.*`: extracted at runtime from draw.io's own SAP palette (needs a recent draw.io)\n\nIf the native palette is complete and renders correctly everywhere, the bundle could be retired. That would remove about 750 KB of embedded icon data and any question about redistributing icons.\n\n**Task**\nProduce a comparison: coverage (which icons are in one set only), naming, rendering fidelity in the built-in editor and on app.diagrams.net, and the draw.io version needed. Post the findings as a comment or a `docs/` page, with a recommendation."
+  },
+  {
+    "title": "Diagram linter: check a .drawio file against the SAP rules",
+    "labels": [
+      "help wanted",
+      "enhancement"
+    ],
+    "body": "A tool that reads an existing `.drawio` file and reports violations of the SAP diagram rules: floating icons, wrong connector semantics, backends inside the BTP boundary, colours outside the palette, missing legend.\n\nThis could ship as an MCP tool (`check-sap-diagram`) and as a CLI for CI pipelines.\n\nPlease open a discussion or comment with a proposed rule set and design before writing code."
+  },
+  {
+    "title": "Make the server test suite pass on Windows",
+    "labels": [
+      "windows",
+      "help wanted"
+    ],
+    "body": "Five suites in `packages/drawio-mcp-server` fail on Windows and pass on Linux:\n`install/hosts/zed`, `install/hosts/opencode`, `install/hosts/codex`, `install-desktop-plugin`, `stdio-shutdown`.\n\nThey come from upstream and assume POSIX paths and signal semantics (for example, `SIGTERM` does not run the shutdown handler on Windows).\n\n**Task**\nFind out which failures are test assumptions and which are real bugs. Since this code is upstream's, the best outcome is a PR to https://github.com/lgazo/drawio-mcp-server, then we merge it back."
+  },
+  {
+    "title": "Windows-friendly test scripts with cross-env",
+    "labels": [
+      "good first issue",
+      "windows"
+    ],
+    "body": "The `test` scripts in several packages use POSIX syntax (`NODE_OPTIONS=--experimental-vm-modules jest`), so `pnpm test` fails in PowerShell and cmd.\n\n**Task**\nUse `cross-env` (or an equivalent) so the scripts run on every OS, and update the note in `CONTRIBUTING.md`. Check that Linux CI still passes.\n\nBecause the scripts are inherited from upstream, consider offering the same change upstream."
+  }
+]

@@ -1,0 +1,31 @@
+name: Bug report
+description: Something in the server, plugin or build is broken
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      description: OS, Node.js version, MCP client
+      placeholder: "Windows 11, Node 22.12, Claude Code"
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Server output or browser console, with anything confidential removed.
+      render: shell

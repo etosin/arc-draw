@@ -1,0 +1,12 @@
+{
+  "name": "drawio",
+  "version": "0.2.0",
+  "description": "Draw.io MCP: built-in editor, page/layer tools, AWS/GCP/Azure/Cisco stencils",
+  "mcpServers": {
+    "drawio": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "drawio-mcp-server", "--editor"]
+    }
+  }
+}

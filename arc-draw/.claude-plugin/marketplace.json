@@ -1,0 +1,15 @@
+{
+  "name": "drawio-mcp-server",
+  "owner": { "name": "lgazo", "url": "https://github.com/lgazo" },
+  "plugins": [
+    {
+      "name": "drawio",
+      "source": "./packages/drawio-mcp-claude-plugin",
+      "description": "Draw.io MCP server + built-in editor + slash commands",
+      "version": "0.2.0",
+      "homepage": "https://github.com/lgazo/drawio-mcp-server",
+      "keywords": ["drawio", "mcp", "diagrams", "diagramming", "architecture"],
+      "license": "MIT"
+    }
+  ]
+}

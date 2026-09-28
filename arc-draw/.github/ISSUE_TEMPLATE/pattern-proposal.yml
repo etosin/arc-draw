@@ -1,0 +1,37 @@
+name: Pattern proposal
+description: Suggest a reusable SAP architecture pattern the agent should know
+title: "[Pattern] "
+labels: ["pattern", "help wanted"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        If you draw the same architecture every month, it probably belongs here.
+        No code needed. Describe it and a maintainer or contributor will turn it into a pattern.
+        **Remove anything confidential first.**
+  - type: input
+    id: name
+    attributes:
+      label: Pattern name
+      placeholder: "Side-by-side extension with CAP and Cloud Connector"
+    validations:
+      required: true
+  - type: textarea
+    id: components
+    attributes:
+      label: Components
+      description: The SAP products and systems involved, and where each sits (BTP, customer landscape, third party).
+    validations:
+      required: true
+  - type: textarea
+    id: flows
+    attributes:
+      label: Flows
+      description: What talks to what, in what order, sync or async.
+    validations:
+      required: true
+  - type: textarea
+    id: reference
+    attributes:
+      label: Reference diagram or link
+      description: An existing SAP reference architecture, or your own sanitised diagram.

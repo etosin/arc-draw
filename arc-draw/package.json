@@ -1,0 +1,43 @@
+{
+  "name": "arc-draw",
+  "version": "0.1.0",
+  "description": "ARC-DRAW: open-source MCP server that lets AI agents draw SAP BTP solution diagrams on a live draw.io canvas, with the official SAP icons and diagram rules. Fork of drawio-mcp-server.",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.8.1",
+  "scripts": {
+    "build": "pnpm -r build",
+    "dev": "pnpm -r dev",
+    "clean": "pnpm -r clean",
+    "test": "pnpm -r test",
+    "test:watch": "pnpm -r test:watch",
+    "test:coverage": "pnpm -r test:coverage",
+    "setup": "pnpm install && pnpm -r build",
+    "sap:catalog": "node tools/build-sap-catalog.cjs",
+    "sap:constitution": "node tools/build-sap-constitution.cjs"
+  },
+  "keywords": [
+    "mcp",
+    "modelcontextprotocol",
+    "drawio",
+    "diagrams.net",
+    "sap",
+    "sap-btp",
+    "architecture",
+    "solution-diagram"
+  ],
+  "author": "Emerson Tosin",
+  "license": "MIT",
+  "devDependencies": {
+    "ts-jest": "29.4.9"
+  },
+  "upstreamBase": "drawio-mcp-server@2.3.0 (github.com/lgazo/drawio-mcp-server)",
+  "homepage": "https://github.com/etosin/arc-draw#readme",
+  "bugs": {
+    "url": "https://github.com/etosin/arc-draw/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/etosin/arc-draw.git"
+  }
+}

@@ -1,0 +1,40 @@
+name: Diagram feedback
+description: The agent drew something that doesn't look like SAP would draw it (or nailed it!)
+title: "[Diagram] "
+labels: ["diagram-feedback"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you! This is the most valuable feedback the project gets.
+        **Remove client names, system IDs, hostnames and anything confidential first.**
+  - type: textarea
+    id: prompt
+    attributes:
+      label: The prompt you used
+      placeholder: "Draw a TO-BE inbound integration: partner → …"
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: What the agent drew
+      description: Drag a screenshot here, or attach the exported .drawio / .drawio.svg file.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What is wrong, and what it should look like
+      description: A link to the relevant page of the SAP BTP Solution Diagram guideline is ideal.
+    validations:
+      required: true
+  - type: input
+    id: client
+    attributes:
+      label: MCP client and model
+      placeholder: "Claude Code + Opus, …"
+  - type: input
+    id: version
+    attributes:
+      label: ARC-DRAW commit or release
