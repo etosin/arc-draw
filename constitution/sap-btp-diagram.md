@@ -16,6 +16,9 @@
    **`get-sap-guideline`** with a topic (areas, connectors, foundation, icons,
    numbers, product_names, component_groups, big_picture, examples, …). These tools
    are the source of truth; this constitution is the summary.
+   After drawing a non-trivial diagram, call **`check-sap-diagram`** (no arguments
+   checks the live canvas) and fix anything it reports before telling the user
+   you are done. It checks structure and SAP styling; it does not judge layout.
 1. **Icon vocabulary is SAP-native.** Place SAP products with `add-cell-of-shape`
    using a `sap.*` id (§6). Never approximate an SAP product with a generic box.
 2. **Grammar over vibes.** Colours, line semantics, radius and spacing below are
