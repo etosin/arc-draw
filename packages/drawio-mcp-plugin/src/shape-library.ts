@@ -214,6 +214,52 @@ export function getShape(name: string): Shape | undefined {
   return { category: r.category, style: r.style, title: r.name || undefined };
 }
 
+function slug(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_|_$/g, "");
+}
+
+/**
+ * Close matches for a shape_name that did not resolve, for an error message
+ * that tells the agent what to try instead of failing silently. Matches by
+ * slugified title (what get-shapes-in-category shows as `title`, e.g. an
+ * agent trying "Adapter Highlight" instead of the `id` it was also given)
+ * and by the last segment of dotted ids (e.g. trying "cloud_integration"
+ * instead of "sap.cloud_integration").
+ */
+export function suggestShapeIds(name: string, limit = 5): string[] {
+  const needle = slug(name);
+  if (!needle) return [];
+  const scored: Array<[string, number]> = [];
+
+  const consider = (id: string, title?: string) => {
+    const idSlug = slug(id);
+    const lastSegment = slug(id.split(".").pop() ?? id);
+    const titleSlug = title ? slug(title) : "";
+    let score = -1;
+    if (idSlug === needle || titleSlug === needle) score = 0;
+    else if (lastSegment === needle) score = 1;
+    else if (idSlug.includes(needle) || titleSlug.includes(needle)) score = 2;
+    if (score >= 0) scored.push([id, score]);
+  };
+
+  for (const [id, s] of Object.entries(generalShapes)) consider(id, s.title);
+  for (const [id, r] of runtimeCatalog) consider(id, r.name);
+
+  scored.sort((a, b) => a[1] - b[1]);
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const [id] of scored) {
+    if (seen.has(id)) continue;
+    seen.add(id);
+    out.push(id);
+    if (out.length >= limit) break;
+  }
+  return out;
+}
+
 export function getCategories(): string[] {
   const set = new Set<string>();
   for (const s of Object.values(generalShapes)) set.add(s.category);

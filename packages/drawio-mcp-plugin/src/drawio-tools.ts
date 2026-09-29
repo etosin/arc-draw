@@ -8,6 +8,7 @@ import {
   getCategories,
   getShape,
   getShapesByCategory,
+  suggestShapeIds,
 } from "./shape-library.js";
 import type { MxGraphIsLayer } from "./types.js";
 
@@ -1608,10 +1609,22 @@ export function get_shape_by_name(
   _ui: any,
   options: DrawioCellOptions,
 ): any | null {
-  const shape = getShape(options.shape_name as string);
-  if (!shape) return null;
+  const shape_name = options.shape_name as string;
+  const shape = getShape(shape_name);
+  if (!shape) {
+    const suggestions = suggestShapeIds(shape_name);
+    return {
+      found: false,
+      shape_name,
+      suggestions,
+      message:
+        suggestions.length > 0
+          ? `No shape named "${shape_name}". Did you mean: ${suggestions.join(", ")}?`
+          : `No shape named "${shape_name}". Use get-shape-categories and get-shapes-in-category to find a valid id.`,
+    };
+  }
   return {
-    id: options.shape_name,
+    id: shape_name,
     ...shape,
   };
 }
@@ -1635,7 +1648,15 @@ export function add_cell_of_shape(ui: any, options: DrawioCellOptions) {
 
   const shape_entry = get_shape_by_name(ui, { shape_name });
 
-  if (!shape_entry) return null;
+  if (!shape_entry || (shape_entry as any).found === false) {
+    const suggestions = ((shape_entry as any)?.suggestions as string[]) ?? [];
+    throw new Error(
+      suggestions.length > 0
+        ? `No shape named "${shape_name}". Did you mean: ${suggestions.join(", ")}? ` +
+          `Use the exact id, not the display title — get-shapes-in-category returns both.`
+        : `No shape named "${shape_name}". Use get-shape-categories and get-shapes-in-category to find a valid id.`,
+    );
+  }
 
   const mergedStyle = normalize_shape_style(
     shape_name,
