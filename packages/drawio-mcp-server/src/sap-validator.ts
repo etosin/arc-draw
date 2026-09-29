@@ -430,6 +430,27 @@ function checkPage(cells: Cell[], page: string | undefined): Finding[] {
     });
   }
 
+  // ---- fake icon styles (section 6: icons are resolved from the library,
+  // never hand-authored). A cell that declares shape=image without a real
+  // embedded SVG payload is exactly what an agent produces when it invents a
+  // style instead of calling get-shapes-in-category / get-shape-by-name: it
+  // renders as a flat coloured box, and — because isImage() below correctly
+  // treats "shape=image" as an icon — it would otherwise dodge the
+  // solid-saturated-fill check too, hiding the very symptom that gives it away.
+  const fakeIcons = vertices.filter((c) => {
+    if (c.style.get("shape") !== "image") return false;
+    return !/image=data:image\/[a-z0-9+.-]+,/i.test(c.styleRaw);
+  });
+  if (fakeIcons.length > 0) {
+    add({
+      severity: "warning",
+      rule: "fake-icon-style",
+      message: `${fakeIcons.length} cell(s) declare shape=image without an embedded icon (no image=data:... payload) — this looks like an invented style rather than a resolved SAP icon.`,
+      cells: firstIds(fakeIcons),
+      hint: "Resolve the icon via get-shapes-in-category / get-shape-by-name and use its exact style (section 6); never hand-author shape=image.",
+    });
+  }
+
   // ---- backends outside BTP (sections 2a, 6a)
   const abs = makeAbsoluteBox(byId);
   const btpAreas = vertices.filter((c) => {

@@ -179,6 +179,49 @@ describe("validateSapDiagram: SAP styling", () => {
   });
 });
 
+describe("validateSapDiagram: fake icon styles", () => {
+  it("flags shape=image with no embedded icon data (a hand-invented style)", () => {
+    const xml = model(
+      box("fake", {
+        style: "shape=image;verticalLabelPosition=bottom;fillColor=#0070F2;",
+        label: "Cloud Integration",
+      }),
+    );
+    const r = validateSapDiagram(xml);
+    expect(r.findings).toContainEqual(
+      expect.objectContaining({ severity: "warning", rule: "fake-icon-style", cells: ["fake"] }),
+    );
+  });
+
+  it("does not flag a real icon with embedded SVG data", () => {
+    const xml = model(
+      box("real", {
+        style: "shape=image;image=data:image/svg+xml,PHN2ZyB4bWxucz0i;",
+        label: "Cloud Integration",
+      }),
+    );
+    const r = validateSapDiagram(xml);
+    expect(r.findings.filter((f) => f.rule === "fake-icon-style")).toEqual([]);
+  });
+
+  it("does not flag the native mxgraph.sap.icon stencil (no embedded data needed)", () => {
+    const xml = model(
+      box("native", {
+        style: "shape=mxgraph.sap.icon;SAPIcon=Cloud_Integration;",
+        label: "Cloud Integration",
+      }),
+    );
+    const r = validateSapDiagram(xml);
+    expect(r.findings.filter((f) => f.rule === "fake-icon-style")).toEqual([]);
+  });
+
+  it("does not flag ordinary boxes that never claimed to be an image", () => {
+    const xml = model(box("plain", { style: "fillColor=#0070F2;", w: 160, h: 80 }));
+    const r = validateSapDiagram(xml);
+    expect(r.findings.filter((f) => f.rule === "fake-icon-style")).toEqual([]);
+  });
+});
+
 describe("validateSapDiagram: backends outside BTP", () => {
   it("flags an S/4HANA box placed inside the BTP area", () => {
     const xml = model(
