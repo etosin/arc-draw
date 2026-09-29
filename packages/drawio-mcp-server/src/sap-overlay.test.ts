@@ -40,26 +40,34 @@ describe("ARC-DRAW SAP overlay (MCP surface)", () => {
     expect(instructions).toContain("get-sap-examples");
   });
 
-  it("tells the agent how to pick a diagram level", () => {
+  it("tells the agent to pick a diagram level matching the audience", () => {
     const instructions = client.getInstructions() ?? "";
-    expect(instructions).toContain("Pick the level first");
-    expect(instructions).toMatch(/L2 and say so/);
+    expect(instructions).toContain("Match the level of detail to the audience");
+    expect(instructions).toMatch(/L0.*L1.*L2/s);
   });
 
-  it("puts the level choice as the first step of the compose order, before create-page", () => {
-    // A live test found the level rule being skipped when it lived only in the
-    // golden-rules preamble: the model followed the concrete build checklist
-    // (§8) and never got to it. It must appear there too, and first.
+  it("tells the agent NOT to announce the level unless asked", () => {
+    // A live test found the model narrating "drawing in L2" unprompted, which
+    // most users asking for "a diagram" neither understand nor want. The level
+    // still governs styling/detail (checked below), it just should not be
+    // announced on its own.
+    const instructions = client.getInstructions() ?? "";
+    expect(instructions).toMatch(
+      /do\s+not\s+announce\s+the\s+level.*unless\s+they\s+bring/is,
+    );
+  });
+
+  it("puts the level decision as the first step of the compose order, before create-page", () => {
     const instructions = client.getInstructions() ?? "";
     const composeIdx = instructions.indexOf("Compose order");
     expect(composeIdx).toBeGreaterThan(-1);
-    const pickLevelIdx = instructions.indexOf(
-      "Pick the level before drawing anything",
+    const decideLevelIdx = instructions.indexOf(
+      "Decide the level before drawing anything",
       composeIdx,
     );
     const createPageIdx = instructions.indexOf("create-page", composeIdx);
-    expect(pickLevelIdx).toBeGreaterThan(composeIdx);
-    expect(pickLevelIdx).toBeLessThan(createPageIdx);
+    expect(decideLevelIdx).toBeGreaterThan(composeIdx);
+    expect(decideLevelIdx).toBeLessThan(createPageIdx);
   });
 
   it("registers the SAP tools", async () => {
