@@ -281,13 +281,18 @@ anchor, backends outside it, semantic connectors, a legend, and a title.
 ## 8. Compose order (deterministic build sequence)
 
 For any SAP solution diagram, drive the MCP in this order:
-1. `create-page` (name it, e.g. "TO-BE — Inbound").
-2. Draw the **BTP boundary** and any other **areas** outer→inner (§2, §2a).
-3. Place **backend / non-BTP systems** as labelled areas **outside** BTP (§6a).
-4. Place **SAP icons** inside their areas (§6), consistent sizing (~48–64px), even
+1. **Pick the level before drawing anything** (rule 0.7): L0, L1 or L2. If the
+   user did not name one, use **L2** and state that choice in one sentence —
+   do not draw first and classify afterwards.
+2. `create-page` (name it, e.g. "TO-BE — Inbound").
+3. Draw the **BTP boundary** and any other **areas** outer→inner (§2, §2a).
+4. Place **backend / non-BTP systems** as labelled areas **outside** BTP (§6a).
+5. Place **SAP icons** inside their areas (§6), consistent sizing (~48–64px), even
    spacing.
-5. Draw **connectors** with correct line style + semantic colour (§3, §6b); number
+6. Draw **connectors** with correct line style + semantic colour (§3, §6b); number
    the path if sequential (§4).
-6. Add the **legend** (§7) and a title (§1 title colour).
-7. Verify: no floating icons, no solid saturated fills, backends outside BTP, every
-   semantic explained, palette within spec.
+7. Add the **legend** (§7, only for L1/L2 — see rule 0.3) and a title (§1 title
+   colour).
+8. Verify: level was stated, no floating icons, no solid saturated fills, backends
+   outside BTP, every semantic explained, palette within spec.
+9. Call **`check-sap-diagram`** (rule 0.0) and fix anything it reports.

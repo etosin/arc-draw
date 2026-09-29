@@ -46,6 +46,22 @@ describe("ARC-DRAW SAP overlay (MCP surface)", () => {
     expect(instructions).toMatch(/L2 and say so/);
   });
 
+  it("puts the level choice as the first step of the compose order, before create-page", () => {
+    // A live test found the level rule being skipped when it lived only in the
+    // golden-rules preamble: the model followed the concrete build checklist
+    // (§8) and never got to it. It must appear there too, and first.
+    const instructions = client.getInstructions() ?? "";
+    const composeIdx = instructions.indexOf("Compose order");
+    expect(composeIdx).toBeGreaterThan(-1);
+    const pickLevelIdx = instructions.indexOf(
+      "Pick the level before drawing anything",
+      composeIdx,
+    );
+    const createPageIdx = instructions.indexOf("create-page", composeIdx);
+    expect(pickLevelIdx).toBeGreaterThan(composeIdx);
+    expect(pickLevelIdx).toBeLessThan(createPageIdx);
+  });
+
   it("registers the SAP tools", async () => {
     const { tools } = await client.listTools();
     const names = tools.map((t) => t.name);
