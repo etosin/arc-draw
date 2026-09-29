@@ -29,6 +29,7 @@ import { registerSetCellDataTool } from "./set-cell-data.js";
 import { registerSetCellParentTool } from "./set-cell-parent.js";
 import { registerSetCellShapeTool } from "./set-cell-shape.js";
 import { registerSetDocumentTitleTool } from "./set-document-title.js";
+import { registerCheckSapDiagramTool } from "./check-sap-diagram.js";
 import { registerGetSapExamplesTool } from "./get-sap-examples.js";
 import { registerGetSapGuidelineTool } from "./get-sap-guideline.js";
 
@@ -40,6 +41,7 @@ const registrars: ToolRegistrar[] = [
   registerGetShapeCategoriesTool,
   registerGetShapesInCategoryTool,
   registerGetShapeByNameTool,
+  registerCheckSapDiagramTool,
   registerGetSapExamplesTool,
   registerGetSapGuidelineTool,
   registerAddCellOfShapeTool,

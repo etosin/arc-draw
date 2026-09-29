@@ -150,6 +150,20 @@ We would rather tell you now:
 - **Diagram quality depends on the model.** The constitution steers the agent; it can't make every model perfect. That is why diagram feedback is so valuable.
 - **Windows:** build and run work from PowerShell, but `pnpm test` needs Git Bash or WSL, and a few inherited upstream tests assume Linux/macOS.
 
+## 🧭 Related projects
+
+ARC-DRAW is not the only attempt at teaching an AI agent to draw SAP BTP
+diagrams. [**btp-drawio-skill**](https://github.com/lemaiwo/btp-drawio-skill)
+by Wouter Lemaire is a Claude Code plugin: a skill that authors `.drawio`
+files directly, with the full official SAP BTP icon library bundled and a
+structural + style validator script. ARC-DRAW takes a different route: an
+MCP server that edits a **live** draw.io canvas, so a person and the agent
+can work on the same diagram together. The two approaches complement each
+other, and both follow the official SAP BTP Solution Diagram guideline.
+
+If you know of another one, [open an issue](../../issues/new) and it will be
+added here.
+
 ## 🔧 Troubleshooting
 
 **The agent says there is no document / `list-documents` is empty.** The canvas tab isn't open. Open `http://localhost:3000/` and keep it open, then hard-refresh (Ctrl+F5).

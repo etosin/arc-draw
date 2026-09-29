@@ -16,6 +16,9 @@
    **`get-sap-guideline`** with a topic (areas, connectors, foundation, icons,
    numbers, product_names, component_groups, big_picture, examples, …). These tools
    are the source of truth; this constitution is the summary.
+   After drawing a non-trivial diagram, call **`check-sap-diagram`** (no arguments
+   checks the live canvas) and fix anything it reports before telling the user
+   you are done. It checks structure and SAP styling; it does not judge layout.
 1. **Icon vocabulary is SAP-native.** Place SAP products with `add-cell-of-shape`
    using a `sap.*` id (§6). Never approximate an SAP product with a generic box.
 2. **Grammar over vibes.** Colours, line semantics, radius and spacing below are
@@ -30,6 +33,19 @@
 6. **Colour containers by owner, systems by type.** A customer / on-premise
    environment is a NON-SAP boundary → **grey** container, even though an SAP system
    inside it stays **blue** (§6a). Blue is only for SAP/BTP.
+7. **Match the level of detail to the audience, silently.** SAP defines three
+   audiences: **L0** (only needs an overview: business roles, enterprise architects,
+   IT managers — no protocols, no legend, one-line description instead), **L1**
+   (strong technical acumen, takes part in technical decisions — protocols and
+   components like Cloud Connector shown, legend for any semantics used) and **L2**
+   (extensive technical understanding, needs detail to decide — full detail,
+   ports/adapters/destinations where relevant). The guideline mentions L3 only in
+   passing and does not specify it; treat it as L2 plus whatever extra implementation
+   detail the user asks for. Most people asking for a diagram do not know these
+   labels and do not want a lecture about them: pick the level that matches what
+   they asked for (a "simple" or high-level request → L0/L1; a request with
+   protocols, adapters or "detailed" → L1/L2) and just draw it well. Do not announce
+   the level or ask the user to pick one unless they bring it up themselves.
 
 ---
 
@@ -270,13 +286,18 @@ anchor, backends outside it, semantic connectors, a legend, and a title.
 ## 8. Compose order (deterministic build sequence)
 
 For any SAP solution diagram, drive the MCP in this order:
-1. `create-page` (name it, e.g. "TO-BE — Inbound").
-2. Draw the **BTP boundary** and any other **areas** outer→inner (§2, §2a).
-3. Place **backend / non-BTP systems** as labelled areas **outside** BTP (§6a).
-4. Place **SAP icons** inside their areas (§6), consistent sizing (~48–64px), even
+1. **Decide the level before drawing anything** (rule 0.7): L0, L1 or L2, to
+   match the styling and detail below — but do not say so to the user unless
+   they ask.
+2. `create-page` (name it, e.g. "TO-BE — Inbound").
+3. Draw the **BTP boundary** and any other **areas** outer→inner (§2, §2a).
+4. Place **backend / non-BTP systems** as labelled areas **outside** BTP (§6a).
+5. Place **SAP icons** inside their areas (§6), consistent sizing (~48–64px), even
    spacing.
-5. Draw **connectors** with correct line style + semantic colour (§3, §6b); number
+6. Draw **connectors** with correct line style + semantic colour (§3, §6b); number
    the path if sequential (§4).
-6. Add the **legend** (§7) and a title (§1 title colour).
-7. Verify: no floating icons, no solid saturated fills, backends outside BTP, every
-   semantic explained, palette within spec.
+7. Add the **legend** (§7, only for L1/L2 — see rule 0.3) and a title (§1 title
+   colour).
+8. Verify: styling matches the chosen level, no floating icons, no solid saturated
+   fills, backends outside BTP, every semantic explained, palette within spec.
+9. Call **`check-sap-diagram`** (rule 0.0) and fix anything it reports.
