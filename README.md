@@ -14,6 +14,12 @@
 
 [Quick start](#-quick-start) · [Try a prompt](#-try-these-prompts) · [**Help build it**](#-help-build-this) · [Roadmap](#-roadmap)
 
+<br>
+
+<img src="docs/assets/demo.gif" alt="One prompt to Claude Code, and ARC-DRAW builds an SAP BTP inbound-integration diagram on a live draw.io canvas: partner, SAP BTP with Cloud Integration and Connectivity Service, Cloud Connector, and S/4HANA on-premise, with a legend" width="720">
+
+<sub>One prompt to Claude Code, a diagram built live on the draw.io canvas (sped up ~3.5×). The agent finishes by checking its own work with <code>check-sap-diagram</code>.</sub>
+
 </div>
 
 ---
